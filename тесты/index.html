@@ -1183,6 +1183,39 @@
       background: rgba(245, 158, 11, 0.08);
     }
 
+    .db-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #6ee7b7;
+      margin-top: 6px;
+      transition: var(--transition);
+    }
+
+    .db-live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: blink 1.5s infinite;
+    }
+
+    .empty-leaderboard-msg {
+      text-align: center;
+      padding: 45px 20px;
+      background: rgba(3, 7, 18, 0.35);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+    }
+
     .leader-left {
       display: flex;
       align-items: center;
@@ -1702,14 +1735,22 @@
     ======================================================== -->
     <section class="view-section" id="view-leaderboard">
       <div class="glass-panel leaderboard-card">
-        <div class="leaderboard-header">
+        <div class="leaderboard-header" style="flex-wrap: wrap; gap: 14px;">
           <div>
             <h2 style="font-size:1.4rem; font-weight:800; color:#fff;">Рейтинг Группы</h2>
-            <p style="font-size:0.85rem; color:var(--text-muted);">Лучшие результаты студентов в режиме «Блиц-Батл»</p>
+            <div class="db-status-pill" id="dbStatusPill">
+              <span class="db-live-dot"></span>
+              <span id="dbStatusText">Облачная БД: Подключена (Real-time Sync)</span>
+            </div>
           </div>
-          <button class="btn" style="background:rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;" onclick="clearLeaderboard()">
-            Очистить
-          </button>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <button class="btn" style="background:rgba(0,242,254,0.1); border:1px solid rgba(0,242,254,0.3); color:var(--cyan); font-size:0.82rem; padding:8px 14px;" onclick="syncWithDatabase(true)">
+              🔄 Обновить
+            </button>
+            <button class="btn" style="background:rgba(244,63,94,0.1); border:1px solid rgba(244,63,94,0.3); color:#fda4af; font-size:0.82rem; padding:8px 14px;" onclick="clearLeaderboard()">
+              🗑️ Очистить БД
+            </button>
+          </div>
         </div>
 
         <div class="leaderboard-list" id="leaderboardList">
@@ -2729,37 +2770,134 @@
     }
 
     /* ========================================================
-       7. LEADERBOARD STORAGE (РЕЙТИНГ)
+       7. CLOUD DATABASE & REAL-TIME LEADERBOARD (ОБЛАЧНАЯ БАЗА ДАННЫХ)
     ======================================================== */
-    function getLeaderboard() {
+    const DB_ENDPOINT = 'https://api.restful-api.dev/objects/ff808181a09d98f701a189e04f1b592f';
+    const CACHE_KEY = 'krmu_bio_leaderboard_v3';
+    let isDbSyncing = false;
+    let autoRefreshTimer = null;
+
+    function getLocalLeaderboard() {
       try {
-        const data = localStorage.getItem('krmu_bio_leaderboard');
-        return data ? JSON.parse(data) : [
-          { name: "Накипов Әділжан", group: "107Б", score: 4250, rank: "Академик Физиологии РК" },
-          { name: "Аханай Ернұр", group: "107Б", score: 3820, rank: "Главный Реаниматолог" },
-          { name: "Серік Мерей", group: "107Б", score: 3640, rank: "Врач Высшей Категории" },
-          { name: "Алихан С.", group: "107Б", score: 2950, rank: "Ординатор Кафедры" }
-        ];
-      } catch (e) {
-        return [];
+        const raw = localStorage.getItem(CACHE_KEY);
+        if (raw !== null) {
+          return JSON.parse(raw);
+        }
+      } catch (e) {}
+      return null;
+    }
+
+    function setLocalLeaderboard(list) {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(list || []));
+      } catch (e) {}
+    }
+
+    function setDbStatus(text, isOnline = true) {
+      const pill = document.getElementById('dbStatusPill');
+      const label = document.getElementById('dbStatusText');
+      if (pill && label) {
+        label.textContent = text;
+        if (isOnline) {
+          pill.style.background = 'rgba(16, 185, 129, 0.12)';
+          pill.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+          pill.style.color = '#6ee7b7';
+        } else {
+          pill.style.background = 'rgba(245, 158, 11, 0.12)';
+          pill.style.borderColor = 'rgba(245, 158, 11, 0.3)';
+          pill.style.color = '#fde68a';
+        }
       }
     }
 
-    function saveScore(name, group, score, rank) {
-      let list = getLeaderboard();
-      list.push({ name, group, score, rank });
-      list.sort((a, b) => b.score - a.score);
-      list = list.slice(0, 15);
+    async function syncWithDatabase(showFeedback = false) {
+      if (isDbSyncing) return;
+      isDbSyncing = true;
+      if (showFeedback) setDbStatus('Облачная БД: Загрузка рекордов группы...');
+
       try {
-        localStorage.setItem('krmu_bio_leaderboard', JSON.stringify(list));
-      } catch (e) {}
-      renderLeaderboard();
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const resp = await fetch(DB_ENDPOINT, { 
+          cache: 'no-store',
+          signal: controller.signal 
+        });
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const json = await resp.json();
+        const leaders = (json && json.data && Array.isArray(json.data.leaders)) ? json.data.leaders : [];
+
+        setLocalLeaderboard(leaders);
+        renderLeaderboardUI(leaders);
+        setDbStatus('Облачная БД: Синхронизировано • Онлайн', true);
+        if (showFeedback) playSuccessChime();
+      } catch (err) {
+        console.warn('DB sync notice:', err);
+        setDbStatus('Облачная БД: Автономный режим (Локально)', false);
+        const cached = getLocalLeaderboard();
+        renderLeaderboardUI(cached !== null ? cached : []);
+      } finally {
+        isDbSyncing = false;
+      }
     }
 
-    function renderLeaderboard() {
-      const list = getLeaderboard();
+    async function saveScore(name, group, score, rank) {
+      let currentList = getLocalLeaderboard() || [];
+      const newEntry = {
+        name: name || "Интерн",
+        group: group || "107Б ҚРМУ",
+        score: Number(score) || 0,
+        rank: rank || "Ординатор",
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
+
+      currentList.push(newEntry);
+      currentList.sort((a, b) => b.score - a.score);
+      currentList = currentList.slice(0, 30);
+
+      // Save locally first
+      setLocalLeaderboard(currentList);
+      renderLeaderboardUI(currentList);
+
+      // Save to Cloud DB
+      setDbStatus('Облачная БД: Отправка рекорда в базу...');
+      try {
+        const resp = await fetch(DB_ENDPOINT, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'krmu_leaderboard',
+            data: { leaders: currentList }
+          })
+        });
+        if (resp.ok) {
+          setDbStatus('Облачная БД: Рекорд сохранён в общую базу! 🚀', true);
+        } else {
+          setDbStatus('Сохранено на устройстве', false);
+        }
+      } catch (e) {
+        setDbStatus('Сохранено на устройстве (офлайн)', false);
+      }
+    }
+
+    function renderLeaderboardUI(list) {
       const container = document.getElementById('leaderboardList');
+      if (!container) return;
       container.innerHTML = '';
+
+      if (!list || list.length === 0) {
+        container.innerHTML = `
+          <div class="empty-leaderboard-msg">
+            <div style="font-size: 2.4rem; margin-bottom: 8px;">📭</div>
+            <div style="font-size: 1.15rem; font-weight: 700; color: #fff;">Таблица лидеров пуста</div>
+            <div style="font-size: 0.88rem; color: var(--text-muted); margin-top: 6px;">
+              База данных чиста. Пройдите «Блиц-Батл» на смартфоне, и ваш результат появится первым!
+            </div>
+          </div>
+        `;
+        return;
+      }
 
       list.forEach((item, idx) => {
         const row = document.createElement('div');
@@ -2769,7 +2907,7 @@
             <div class="rank-num">${idx + 1}</div>
             <div>
               <div class="leader-name">${item.name}</div>
-              <div class="leader-group">${item.group} • ${item.rank}</div>
+              <div class="leader-group">${item.group} • ${item.rank} ${item.time ? '• ' + item.time : ''}</div>
             </div>
           </div>
           <div class="leader-score">${item.score} <span style="font-size:0.75rem; color:var(--text-muted);">pts</span></div>
@@ -2778,10 +2916,37 @@
       });
     }
 
-    function clearLeaderboard() {
-      if (confirm("Очистить таблицу лидеров?")) {
-        localStorage.removeItem('krmu_bio_leaderboard');
-        renderLeaderboard();
+    async function clearLeaderboard() {
+      const confirmed = confirm("Вы уверены, что хотите ПОЛНОСТЬЮ ОЧИСТИТЬ базу данных рекордов группы?");
+      if (!confirmed) return;
+
+      setDbStatus('Облачная БД: Очистка базы данных...');
+      
+      // 1. Immediately wipe local storage and display empty state
+      setLocalLeaderboard([]);
+      renderLeaderboardUI([]);
+      playBeep(350, 0.1);
+
+      // 2. Wipe cloud DB
+      try {
+        const resp = await fetch(DB_ENDPOINT, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'krmu_leaderboard',
+            data: { leaders: [] }
+          })
+        });
+
+        if (resp.ok) {
+          setDbStatus('Облачная БД: База данных успешно очищена! ✨', true);
+          playSuccessChime();
+        } else {
+          setDbStatus('Локально очищено', false);
+        }
+      } catch (err) {
+        console.error('Clear cloud DB error:', err);
+        setDbStatus('Локально очищено (офлайн)', false);
       }
     }
 
@@ -2798,7 +2963,9 @@
       if (activeBtn) activeBtn.classList.add('active');
       if (activeView) activeView.classList.add('active');
 
-      if (tabId === 'leaderboard') renderLeaderboard();
+      if (tabId === 'leaderboard') {
+        syncWithDatabase(false);
+      }
       playBeep(650, 0.05);
     }
 
@@ -2824,7 +2991,15 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadCase(0);
       selectOrgan('heart');
-      renderLeaderboard();
+      syncWithDatabase(false);
+
+      // Auto-poll database every 10 seconds while on leaderboard
+      setInterval(() => {
+        const lbSection = document.getElementById('view-leaderboard');
+        if (lbSection && lbSection.classList.contains('active')) {
+          syncWithDatabase(false);
+        }
+      }, 10000);
     });
   </script>
 </body>
