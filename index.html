@@ -1,0 +1,2831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ГОМЕОСТАЗ: Битва за Жизнь | Интерактивная игра «Организм Человека»</title>
+  <meta name="description" content="Интерактивный медицинский симулятор и анатомический квест по физиологии человека. Проверь свои знания и спаси пациента!">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #080c16;
+      --bg-card: #0f172a;
+      --bg-card-hover: #1e293b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-glow: rgba(0, 242, 254, 0.3);
+      --cyan: #00f2fe;
+      --cyan-glow: rgba(0, 242, 254, 0.4);
+      --blue: #3b82f6;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.35);
+      --rose: #f43f5e;
+      --rose-glow: rgba(244, 63, 94, 0.4);
+      --amber: #f59e0b;
+      --purple: #a855f7;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(168, 85, 247, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Glass Effect */
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(8, 12, 22, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .header-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #00f2fe, #4facfe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #04101e;
+      font-size: 22px;
+      font-weight: 800;
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    .logo-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(90deg, #fff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-text span {
+      font-size: 0.75rem;
+      color: var(--cyan);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .btn-qr {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(79, 172, 254, 0.15));
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+    }
+
+    .btn-qr:hover {
+      background: var(--cyan);
+      color: #04101e;
+      box-shadow: 0 0 25px var(--cyan-glow);
+      transform: translateY(-1px);
+    }
+
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+    }
+
+    .btn-icon:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      max-width: 1280px;
+      margin: 16px auto 0;
+      padding: 0 20px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: var(--transition);
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: var(--bg-card-hover);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(59, 130, 246, 0.2));
+      border-color: var(--cyan);
+      color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========================================================
+       MODE 1: CLINICAL RESUSCITATION (РЕАНИМАЦИЯ)
+    ======================================================== */
+    .reanim-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 960px) {
+      .reanim-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Vitals Monitor */
+    .vitals-monitor {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      border: 1px solid rgba(0, 242, 254, 0.2);
+      box-shadow: 0 0 30px rgba(0, 242, 254, 0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .monitor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 12px;
+    }
+
+    .patient-id {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation: blink 1.2s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.85); }
+    }
+
+    .monitor-canvas-box {
+      background: #030712;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 242, 254, 0.15);
+      padding: 10px;
+      position: relative;
+    }
+
+    #ecgCanvas {
+      width: 100%;
+      height: 90px;
+      display: block;
+    }
+
+    .ecg-overlay-stat {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    .vitals-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .vital-stat-card {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: var(--transition);
+    }
+
+    .vital-stat-card.alert {
+      border-color: var(--rose);
+      background: rgba(244, 63, 94, 0.08);
+      animation: pulseAlert 1.5s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { box-shadow: 0 0 0 rgba(244, 63, 94, 0); }
+      50% { box-shadow: 0 0 16px rgba(244, 63, 94, 0.3); }
+    }
+
+    .vital-label {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .vital-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .vital-unit {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .homeostasis-meter-box {
+      margin-top: 4px;
+    }
+
+    .meter-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .meter-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+
+    .meter-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, #f43f5e, #f59e0b, #10b981);
+      transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Scenario Board */
+    .scenario-board {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .case-badge-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .case-tag {
+      background: rgba(0, 242, 254, 0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .case-step {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .case-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.3;
+      color: #fff;
+    }
+
+    .case-patient-box {
+      background: rgba(3, 7, 18, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-left: 3px solid var(--cyan);
+    }
+
+    .patient-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    .patient-symptoms {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .symptom-chip {
+      background: rgba(244, 63, 94, 0.12);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.25);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .action-options-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-buttons-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .action-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      color: var(--text-main);
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(0, 242, 254, 0.4);
+      transform: translateX(4px);
+    }
+
+    .action-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .action-letter {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: var(--cyan);
+      font-size: 0.88rem;
+    }
+
+    .action-content h4 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #fff;
+    }
+
+    .action-content p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Feedback Callout */
+    .action-feedback-box {
+      margin-top: 10px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .action-feedback-box.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--emerald);
+      color: #a7f3d0;
+    }
+
+    .action-feedback-box.error {
+      display: block;
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid var(--rose);
+      color: #fecdd3;
+    }
+
+    .feedback-title {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feedback-explanation {
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .next-case-btn {
+      align-self: flex-end;
+      margin-top: 10px;
+      background: linear-gradient(135deg, #00f2fe, #3b82f6);
+      color: #04101e;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      border: none;
+      box-shadow: 0 0 20px var(--cyan-glow);
+      cursor: pointer;
+      display: none;
+    }
+
+    .next-case-btn:hover {
+      box-shadow: 0 0 30px var(--cyan-glow);
+      transform: translateY(-2px);
+    }
+
+    /* Screen Shake on Defibrillator / Alert */
+    .screen-shock {
+      animation: shockFlash 0.5s ease;
+    }
+
+    @keyframes shockFlash {
+      0% { filter: brightness(2) contrast(1.5); }
+      50% { filter: brightness(1.5) contrast(1.2); }
+      100% { filter: brightness(1) contrast(1); }
+    }
+
+    /* ========================================================
+       MODE 2: ANATOMY EXPLORER & ORGAN LAB (АНАТОМИЯ)
+    ======================================================== */
+    .anatomy-container {
+      display: grid;
+      grid-template-columns: 480px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .anatomy-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .body-scanner-card {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .scanner-controls {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .scanner-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.1);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 242, 254, 0.25);
+    }
+
+    .human-body-svg-box {
+      width: 100%;
+      max-width: 380px;
+      position: relative;
+    }
+
+    .human-silhouette {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.15));
+    }
+
+    .organ-hotspot {
+      cursor: pointer;
+      transition: var(--transition);
+      transform-origin: center;
+    }
+
+    .organ-hotspot:hover {
+      filter: drop-shadow(0 0 12px var(--cyan));
+      transform: scale(1.08);
+    }
+
+    .organ-hotspot.active {
+      filter: drop-shadow(0 0 18px #ff4757);
+      animation: organPulse 1.2s infinite;
+    }
+
+    @keyframes organPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* Organ Detail Inspector */
+    .organ-detail-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .organ-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .organ-large-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+    }
+
+    .organ-titles h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .organ-titles span {
+      font-size: 0.85rem;
+      color: var(--cyan);
+      font-style: italic;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .organ-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .organ-metrics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .organ-metric-chip {
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      text-align: center;
+    }
+
+    .organ-metric-chip .label {
+      font-size: 0.72rem;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .organ-metric-chip .val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-top: 4px;
+    }
+
+    .facts-list-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .organ-facts-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .fact-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-left: 3px solid var(--purple);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .fact-item strong {
+      color: #fff;
+    }
+
+    /* Micro-Quiz inside Organ View */
+    .organ-micro-quiz {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .micro-quiz-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .micro-quiz-question {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .micro-quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .micro-quiz-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .micro-btn {
+      padding: 10px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .micro-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--cyan);
+    }
+
+    .micro-btn.correct {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: var(--emerald);
+      color: #6ee7b7;
+    }
+
+    .micro-btn.wrong {
+      background: rgba(244, 63, 94, 0.2);
+      border-color: var(--rose);
+      color: #fda4af;
+    }
+
+    /* ========================================================
+       MODE 3: SPEED ARENA (БЛИЦ-ТУРНИР ДЛЯ ГРУППЫ)
+    ======================================================== */
+    .arena-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* Registration Screen */
+    .arena-start-card {
+      padding: 36px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .arena-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.3);
+    }
+
+    .arena-title {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .arena-subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      line-height: 1.5;
+    }
+
+    .player-input-group {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .player-input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: var(--radius-md);
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .player-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 15px var(--cyan-glow);
+    }
+
+    .btn-start-arena {
+      background: linear-gradient(135deg, #00f2fe, #3b82f6);
+      color: #04101e;
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 16px 32px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 30px var(--cyan-glow);
+      transition: var(--transition);
+    }
+
+    .btn-start-arena:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 45px var(--cyan-glow);
+    }
+
+    /* Live Question Screen */
+    .arena-game-card {
+      padding: 28px;
+      display: none;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .arena-stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(3, 7, 18, 0.5);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      border: 1px solid var(--border-color);
+    }
+
+    .timer-ring-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--amber);
+    }
+
+    .timer-ring-box.critical {
+      color: var(--rose);
+      animation: pulseAlert 0.8s infinite;
+    }
+
+    .arena-score-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    .streak-multiplier {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+
+    .question-progress-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .question-progress-fill {
+      height: 100%;
+      background: var(--cyan);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .arena-question-text {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.4;
+      color: #fff;
+      min-height: 70px;
+    }
+
+    .arena-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .arena-options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .arena-opt-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      color: var(--text-main);
+      font-size: 0.98rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .arena-opt-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--cyan);
+      transform: translateY(-2px);
+    }
+
+    .arena-opt-btn.correct {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: var(--emerald) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .arena-opt-btn.wrong {
+      background: rgba(244, 63, 94, 0.25) !important;
+      border-color: var(--rose) !important;
+      color: #fda4af !important;
+    }
+
+    /* Result & Certificate Screen */
+    .arena-results-card {
+      padding: 36px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .result-badge {
+      font-size: 48px;
+    }
+
+    .result-score-highlight {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #00f2fe, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .result-rank-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .result-stats-row {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .result-stat-box {
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px 24px;
+    }
+
+    .certificate-preview-box {
+      width: 100%;
+      max-width: 600px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 2px solid var(--border-glow);
+      box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+    }
+
+    #certificateCanvas {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .result-actions-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ========================================================
+       MODE 4: LEADERBOARD / ХОЛЛ СЛАВЫ
+    ======================================================== */
+    .leaderboard-card {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .leaderboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .leader-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: var(--transition);
+    }
+
+    .leader-row:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .leader-row.gold {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .leader-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .rank-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.88rem;
+    }
+
+    .gold .rank-num { background: #f59e0b; color: #04101e; }
+    .silver .rank-num { background: #94a3b8; color: #04101e; }
+    .bronze .rank-num { background: #b45309; color: #fff; }
+
+    .leader-name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+
+    .leader-group {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .leader-score {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      color: var(--cyan);
+      font-size: 1.1rem;
+    }
+
+    /* ========================================================
+       QR CODE MODAL
+    ======================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 8, 16, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .qr-modal-card {
+      background: #0f172a;
+      border: 1px solid var(--border-glow);
+      border-radius: var(--radius-xl);
+      padding: 32px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      box-shadow: 0 0 50px rgba(0, 242, 254, 0.25);
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 24px;
+      cursor: pointer;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .close-modal-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .qr-image-wrapper {
+      background: #fff;
+      padding: 16px;
+      border-radius: var(--radius-lg);
+      display: inline-block;
+      margin: 16px 0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .qr-image-wrapper img {
+      width: 220px;
+      height: 220px;
+      display: block;
+    }
+
+    .qr-url-box {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--cyan);
+      word-break: break-all;
+      margin-bottom: 16px;
+    }
+
+    .qr-modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-container">
+      <div class="logo-badge" onclick="switchTab('reanim')">
+        <div class="logo-icon">🫀</div>
+        <div class="logo-text">
+          <h1>ГОМЕОСТАЗ</h1>
+          <span>Организм Человека • ҚРМУ</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-qr" onclick="openQrModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>📲 QR для Группы</span>
+        </button>
+
+        <button class="btn btn-icon" id="soundToggleBtn" onclick="toggleSound()" title="Включить / Выключить звук">
+          🔊
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" id="tab-reanim" onclick="switchTab('reanim')">
+      <span>🩺</span>
+      <span>Реанимация Пациента</span>
+    </button>
+    <button class="tab-btn" id="tab-anatomy" onclick="switchTab('anatomy')">
+      <span>🔬</span>
+      <span>Анатомический Сканер</span>
+    </button>
+    <button class="tab-btn" id="tab-arena" onclick="switchTab('arena')">
+      <span>⚡</span>
+      <span>Блиц-Батл Гомеостаз</span>
+    </button>
+    <button class="tab-btn" id="tab-leaderboard" onclick="switchTab('leaderboard')">
+      <span>🏆</span>
+      <span>Рейтинг Группы</span>
+    </button>
+  </nav>
+
+  <!-- Main Container -->
+  <main>
+
+    <!-- ========================================================
+         VIEW 1: CLINICAL RESUSCITATION (РЕАНИМАЦИЯ)
+    ======================================================== -->
+    <section class="view-section active" id="view-reanim">
+      <div class="reanim-grid">
+        
+        <!-- Left: Patient Vitals Monitor -->
+        <div class="glass-panel vitals-monitor" id="vitalsMonitorPanel">
+          <div class="monitor-header">
+            <div class="patient-id">
+              <span class="live-pulse-dot" id="liveDot"></span>
+              <span>ICU-BED #04 • ПАЦИЕНТ М., 45 ЛЕТ</span>
+            </div>
+            <div style="font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--text-sub);">
+              СТАТУС: <span id="monitorStatusText" style="color:var(--emerald);">НОРМА</span>
+            </div>
+          </div>
+
+          <!-- Canvas ECG Waveform -->
+          <div class="monitor-canvas-box">
+            <canvas id="ecgCanvas" width="400" height="90"></canvas>
+            <div class="ecg-overlay-stat" id="ecgStatLabel">ЧСС: 75 BPM [SINUS]</div>
+          </div>
+
+          <!-- Vitals Cards Grid -->
+          <div class="vitals-cards">
+            <div class="vital-stat-card" id="cardHeartRate">
+              <span class="vital-label">Пульс (ЧСС)</span>
+              <div class="vital-value"><span id="valHR">75</span> <span class="vital-unit">уд/мин</span></div>
+            </div>
+
+            <div class="vital-stat-card" id="cardBloodPressure">
+              <span class="vital-label">Артер. Давление</span>
+              <div class="vital-value"><span id="valBP">120/80</span> <span class="vital-unit">мм рт.ст</span></div>
+            </div>
+
+            <div class="vital-stat-card" id="cardSpo2">
+              <span class="vital-label">Сатурация SpO₂</span>
+              <div class="vital-value"><span id="valSPO2">98</span> <span class="vital-unit">%</span></div>
+            </div>
+
+            <div class="vital-stat-card" id="cardTemp">
+              <span class="vital-label">Температура</span>
+              <div class="vital-value"><span id="valTemp">36.6</span> <span class="vital-unit">°C</span></div>
+            </div>
+          </div>
+
+          <!-- Homeostasis Gauge -->
+          <div class="homeostasis-meter-box">
+            <div class="meter-label-row">
+              <span style="color:var(--text-muted);">Индекс Гомеостаза:</span>
+              <span id="valHomeostasis" style="color:var(--cyan); font-family:'JetBrains Mono';">100%</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-fill" id="meterFill" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Case Briefing & Intervention Board -->
+        <div class="glass-panel scenario-board">
+          <div class="case-badge-row">
+            <div class="case-tag" id="caseSystemBadge">Сердечно-сосудистая система</div>
+            <div class="case-step" id="caseStepIndicator">Клинический случай 1 из 6</div>
+          </div>
+
+          <h2 class="case-title" id="caseTitle">Острый коронарный синдром: Падение насосной функции миокарда</h2>
+
+          <div class="case-patient-box">
+            <p class="patient-desc" id="caseDescription">
+              Пациент доставлен в шоковую палату с жалобами на острейшую жгучую боль за грудиной с иррадиацией в левую руку и лопатку. Холодный липкий пот, выраженная бледность, нарастает слабость.
+            </p>
+            <div class="patient-symptoms" id="caseSymptoms">
+              <span class="symptom-chip">Боль за грудиной</span>
+              <span class="symptom-chip">Гипотония</span>
+              <span class="symptom-chip">Элевация ST на ЭКГ</span>
+            </div>
+          </div>
+
+          <div class="action-options-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>Выберите неотложный медицинский протокол:</span>
+          </div>
+
+          <div class="action-buttons-list" id="caseActionButtons">
+            <!-- Populated via JS -->
+          </div>
+
+          <div class="action-feedback-box" id="caseFeedbackBox">
+            <div class="feedback-title" id="feedbackTitle"></div>
+            <div class="feedback-explanation" id="feedbackExplanation"></div>
+          </div>
+
+          <button class="next-case-btn" id="nextCaseBtn" onclick="nextCase()">
+            Следующий клинический случай ➔
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 2: ANATOMY EXPLORER & ORGAN LAB (АНАТОМИЯ)
+    ======================================================== -->
+    <section class="view-section" id="view-anatomy">
+      <div class="anatomy-container">
+        
+        <!-- Left: Interactive Body Scanner Silhouette -->
+        <div class="glass-panel body-scanner-card">
+          <div class="scanner-controls">
+            <span class="scanner-badge">МЕДИЦИНСКИЙ СКАНЕР 2.0</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);">Нажмите на орган для анализа</span>
+          </div>
+
+          <div class="human-body-svg-box">
+            <svg viewBox="0 0 300 620" class="human-silhouette" xmlns="http://www.w3.org/2000/svg">
+              <!-- Body contour stylized -->
+              <defs>
+                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0e1e38" />
+                  <stop offset="100%" stop-color="#08101e" />
+                </linearGradient>
+                <filter id="glowFilter" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <!-- Stylized Human Contour -->
+              <path d="M 150,20 C 130,20 120,35 120,60 C 120,85 130,95 138,105 C 120,115 100,135 90,165 C 80,195 70,260 65,310 C 62,330 65,340 75,340 C 85,340 88,320 95,270 C 100,290 102,340 105,370 C 110,420 115,500 120,590 C 122,605 138,605 140,590 C 145,510 148,430 150,380 C 152,430 155,510 160,590 C 162,605 178,605 180,590 C 185,500 190,420 195,370 C 198,340 200,290 205,270 C 212,320 215,340 225,340 C 235,340 238,330 235,310 C 230,260 220,195 210,165 C 200,135 180,115 162,105 C 170,95 180,85 180,60 C 180,35 170,20 150,20 Z" 
+                    fill="url(#bodyGrad)" stroke="rgba(0, 242, 254, 0.25)" stroke-width="2" />
+
+              <!-- Internal Grid Lines / Ribcage accent -->
+              <path d="M 125,180 Q 150,195 175,180 M 120,205 Q 150,225 180,205 M 122,230 Q 150,250 178,230" 
+                    fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5" stroke-dasharray="3,3" />
+
+              <!-- Brain Hotspot -->
+              <g class="organ-hotspot" id="hotspot-brain" onclick="selectOrgan('brain')">
+                <circle cx="150" cy="58" r="22" fill="rgba(168, 85, 247, 0.3)" stroke="#a855f7" stroke-width="2" />
+                <text x="150" y="64" text-anchor="middle" font-size="20">🧠</text>
+              </g>
+
+              <!-- Heart Hotspot -->
+              <g class="organ-hotspot active" id="hotspot-heart" onclick="selectOrgan('heart')">
+                <circle cx="160" cy="195" r="24" fill="rgba(244, 63, 94, 0.35)" stroke="#f43f5e" stroke-width="2.5" />
+                <text x="160" y="202" text-anchor="middle" font-size="22">🫀</text>
+              </g>
+
+              <!-- Lungs Hotspot -->
+              <g class="organ-hotspot" id="hotspot-lungs" onclick="selectOrgan('lungs')">
+                <circle cx="132" cy="180" r="18" fill="rgba(0, 242, 254, 0.25)" stroke="#00f2fe" stroke-width="1.5" />
+                <circle cx="178" cy="180" r="18" fill="rgba(0, 242, 254, 0.25)" stroke="#00f2fe" stroke-width="1.5" />
+                <text x="132" y="186" text-anchor="middle" font-size="16">🫁</text>
+              </g>
+
+              <!-- Liver Hotspot -->
+              <g class="organ-hotspot" id="hotspot-liver" onclick="selectOrgan('liver')">
+                <ellipse cx="135" cy="245" rx="22" ry="14" fill="rgba(245, 158, 11, 0.3)" stroke="#f59e0b" stroke-width="2" />
+                <text x="135" y="250" text-anchor="middle" font-size="14" font-weight="bold" fill="#f59e0b">ПЕЧЕНЬ</text>
+              </g>
+
+              <!-- Stomach Hotspot -->
+              <g class="organ-hotspot" id="hotspot-stomach" onclick="selectOrgan('stomach')">
+                <ellipse cx="165" cy="250" rx="18" ry="13" fill="rgba(236, 72, 153, 0.3)" stroke="#ec4899" stroke-width="1.5" />
+                <text x="165" y="255" text-anchor="middle" font-size="12" font-weight="bold" fill="#ec4899">ЖЕЛУДОК</text>
+              </g>
+
+              <!-- Kidneys Hotspot -->
+              <g class="organ-hotspot" id="hotspot-kidneys" onclick="selectOrgan('kidneys')">
+                <circle cx="128" cy="285" r="12" fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="1.5" />
+                <circle cx="172" cy="285" r="12" fill="rgba(59, 130, 246, 0.3)" stroke="#3b82f6" stroke-width="1.5" />
+                <text x="150" y="290" text-anchor="middle" font-size="12" font-weight="bold" fill="#60a5fa">ПОЧКИ</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Right: Organ Details & Micro-Test -->
+        <div class="glass-panel organ-detail-panel" id="organDetailPanel">
+          <div class="organ-header">
+            <div class="organ-large-icon" id="organIcon">🫀</div>
+            <div class="organ-titles">
+              <h2 id="organName">Сердце</h2>
+              <span id="organLatin">Cor / Cardia • Мышечный насос</span>
+            </div>
+          </div>
+
+          <div class="organ-metrics-grid">
+            <div class="organ-metric-chip">
+              <div class="label">Масса органа</div>
+              <div class="val" id="organWeight">250 - 350 г</div>
+            </div>
+            <div class="organ-metric-chip">
+              <div class="label">Кровоток в покое</div>
+              <div class="val" id="organFlow">~250 мл/мин (5%)</div>
+            </div>
+            <div class="organ-metric-chip">
+              <div class="label">Главная функция</div>
+              <div class="val" id="organRole">Гемодинамика</div>
+            </div>
+          </div>
+
+          <div class="facts-list-title">
+            <span>💡</span>
+            <span>Ключевые физиологические факты:</span>
+          </div>
+
+          <div class="organ-facts-container" id="organFactsList">
+            <!-- Populated via JS -->
+          </div>
+
+          <!-- Micro Quiz -->
+          <div class="organ-micro-quiz">
+            <div class="micro-quiz-title">
+              <span>🎯</span>
+              <span>Экспресс-проверка знаний:</span>
+            </div>
+            <div class="micro-quiz-question" id="microQuizQuestion">
+              Какой клапан разделяет левое предсердие и левый желудочек?
+            </div>
+            <div class="micro-quiz-options" id="microQuizOptions">
+              <!-- Populated via JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 3: SPEED ARENA (БЛИЦ-ТУРНИР ДЛЯ ГРУППЫ)
+    ======================================================== -->
+    <section class="view-section" id="view-arena">
+      <div class="arena-container">
+        
+        <!-- Registration Card -->
+        <div class="glass-panel arena-start-card" id="arenaStartCard">
+          <div class="arena-icon">⚡</div>
+          <h2 class="arena-title">Блиц-Батл «Гомеостаз»</h2>
+          <p class="arena-subtitle">
+            12 динамических вопросов по анатомии и физиологии организма человека. 15 секунд на каждый ответ. Проверь свою скорость и соревнуйся за первое место в группе!
+          </p>
+
+          <div class="player-input-group">
+            <input type="text" class="player-input" id="playerNameInput" placeholder="Введите ваше имя (например: Ернұр)" maxlength="25">
+            <input type="text" class="player-input" id="playerGroupInput" placeholder="Группа (например: 107Б ҚРМУ)" maxlength="20" value="107Б ҚРМУ">
+            <button class="btn-start-arena" onclick="startArenaGame()">Начать Блиц-Турнир 🚀</button>
+          </div>
+        </div>
+
+        <!-- Live Question Card -->
+        <div class="glass-panel arena-game-card" id="arenaGameCard">
+          <div class="arena-stats-bar">
+            <div class="timer-ring-box" id="timerBox">
+              <span>⏱️</span>
+              <span id="arenaTimer">15</span> сек
+            </div>
+            <div style="font-size:0.85rem; color:var(--text-muted);" id="arenaProgressText">
+              Вопрос 1 из 12
+            </div>
+            <div class="arena-score-badge">
+              <span id="arenaScore">0</span>
+              <span class="streak-multiplier" id="streakBadge">x1</span>
+            </div>
+          </div>
+
+          <div class="question-progress-track">
+            <div class="question-progress-fill" id="arenaProgressFill"></div>
+          </div>
+
+          <div class="arena-question-text" id="arenaQuestionText">
+            Загрузка вопроса...
+          </div>
+
+          <div class="arena-options-grid" id="arenaOptionsGrid">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Result & Certificate Card -->
+        <div class="glass-panel arena-results-card" id="arenaResultsCard">
+          <div class="result-badge" id="resBadge">🏆</div>
+          <div class="result-score-highlight" id="resScore">1200 БАЛЛОВ</div>
+          <div class="result-rank-title" id="resRank">Звание: Академик Физиологии</div>
+
+          <div class="result-stats-row">
+            <div class="result-stat-box">
+              <div style="font-size:0.75rem; color:var(--text-muted);">ТОЧНОСТЬ</div>
+              <div style="font-size:1.25rem; font-weight:800; color:#fff;" id="resAccuracy">100%</div>
+            </div>
+            <div class="result-stat-box">
+              <div style="font-size:0.75rem; color:var(--text-muted);">ВРЕМЯ ОТВЕТА</div>
+              <div style="font-size:1.25rem; font-weight:800; color:#fff;" id="resAvgTime">3.4 сек</div>
+            </div>
+            <div class="result-stat-box">
+              <div style="font-size:0.75rem; color:var(--text-muted);">СЕРИЯ (КОМБО)</div>
+              <div style="font-size:1.25rem; font-weight:800; color:var(--cyan);" id="resMaxStreak">12x</div>
+            </div>
+          </div>
+
+          <!-- Canvas Certificate Preview -->
+          <div class="certificate-preview-box">
+            <canvas id="certificateCanvas" width="900" height="540"></canvas>
+          </div>
+
+          <div class="result-actions-row">
+            <button class="btn" style="background:var(--emerald); color:#04101e; font-weight:700;" onclick="downloadCertificate()">
+              📥 Скачать Диплом (PNG)
+            </button>
+            <button class="btn btn-qr" onclick="shareResults()">
+              📤 Поделиться с группой
+            </button>
+            <button class="btn btn-icon" style="width:auto; padding:0 16px;" onclick="restartArena()">
+              🔄 Пройти заново
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
+         VIEW 4: LEADERBOARD / ХОЛЛ СЛАВЫ
+    ======================================================== -->
+    <section class="view-section" id="view-leaderboard">
+      <div class="glass-panel leaderboard-card">
+        <div class="leaderboard-header">
+          <div>
+            <h2 style="font-size:1.4rem; font-weight:800; color:#fff;">Рейтинг Группы</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted);">Лучшие результаты студентов в режиме «Блиц-Батл»</p>
+          </div>
+          <button class="btn" style="background:rgba(255,255,255,0.05); color:var(--text-muted); font-size:0.8rem;" onclick="clearLeaderboard()">
+            Очистить
+          </button>
+        </div>
+
+        <div class="leaderboard-list" id="leaderboardList">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       QR CODE MODAL
+  ======================================================== -->
+  <div class="modal-backdrop" id="qrModal" onclick="closeQrModal(event)">
+    <div class="qr-modal-card" onclick="event.stopPropagation()">
+      <button class="close-modal-btn" onclick="closeQrModal()">&times;</button>
+      
+      <div style="font-size: 2rem;">📲</div>
+      <h3 style="font-size: 1.35rem; font-weight: 800; color: #fff; margin-top: 6px;">Сканируйте для игры всей группой</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-top: 4px;">
+        Каждый студент может подключиться со своего смартфона и пройти тест прямо во время презентации!
+      </p>
+
+      <div class="qr-image-wrapper">
+        <img src="qr_code.png" alt="QR Код игры" id="qrImageElement">
+      </div>
+
+      <div class="qr-url-box" id="qrUrlText">
+        https://anispace123.github.io/russiantestgame/
+      </div>
+
+      <div class="qr-modal-buttons">
+        <button class="btn" style="background:var(--cyan); color:#04101e; font-weight:700;" onclick="copyQrLink()">
+          📋 Скопировать ссылку
+        </button>
+        <a href="qr_code.png" download="QR_Organizm_Cheloveka.png" class="btn" style="background:rgba(255,255,255,0.1); color:#fff; text-decoration:none;">
+          💾 Скачать PNG
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    Казахстанско-Российский Медицинский Университет (ҚРМУ) • 107Б тобы • Накипов Әділжан • 2026 г.
+  </footer>
+
+  <!-- Web Audio Synthesizer & Logic Script -->
+  <script>
+    /* ========================================================
+       1. WEB AUDIO SOUND ENGINE (СИНТЕЗАТОР ЗВУКОВ)
+    ======================================================== */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const btn = document.getElementById('soundToggleBtn');
+      btn.textContent = soundEnabled ? '🔊' : '🔇';
+      if (soundEnabled) {
+        initAudio();
+        playBeep(880, 0.08);
+      }
+    }
+
+    function playBeep(freq = 600, duration = 0.08, type = 'sine') {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) { console.warn(e); }
+    }
+
+    function playSuccessChime() {
+      if (!soundEnabled) return;
+      playBeep(523.25, 0.1); // C5
+      setTimeout(() => playBeep(659.25, 0.1), 80); // E5
+      setTimeout(() => playBeep(783.99, 0.2), 160); // G5
+    }
+
+    function playWrongBuzzer() {
+      if (!soundEnabled) return;
+      playBeep(160, 0.25, 'sawtooth');
+    }
+
+    function playDefibrillatorShock() {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+      try {
+        // High rising charge
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.4);
+
+        // Discharge Thump
+        setTimeout(() => {
+          const thump = audioCtx.createOscillator();
+          const thumpGain = audioCtx.createGain();
+          thump.type = 'sine';
+          thump.frequency.setValueAtTime(80, audioCtx.currentTime);
+          thump.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.3);
+          thumpGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          thumpGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+          thump.connect(thumpGain);
+          thumpGain.connect(audioCtx.destination);
+          thump.start();
+          thump.stop(audioCtx.currentTime + 0.3);
+        }, 360);
+      } catch (e) { console.warn(e); }
+    }
+
+    /* ========================================================
+       2. REALISTIC ECG CANVAS MONITOR (ЭКГ АНИМАЦИЯ)
+    ======================================================== */
+    const ecgCanvas = document.getElementById('ecgCanvas');
+    const ecgCtx = ecgCanvas.getContext('2d');
+    let ecgX = 0;
+    let ecgSpeed = 2.2;
+    let ecgPatternType = 'normal'; // 'normal', 'vf' (fib), 'tachy', 'brady'
+    let ecgPoints = [];
+
+    function generateEcgY(t) {
+      // Normal P-QRS-T cycle pattern length 100 steps
+      const cycle = t % 100;
+      const base = 45; // vertical center
+
+      if (ecgPatternType === 'vf') {
+        // Chaotic ventricular fibrillation
+        return base + (Math.sin(t * 0.4) * 16 + Math.cos(t * 0.9) * 12 + (Math.random() - 0.5) * 10);
+      }
+
+      if (cycle < 15) return base; // Isoelectric
+      if (cycle >= 15 && cycle < 25) return base - Math.sin((cycle - 15) / 10 * Math.PI) * 5; // P wave
+      if (cycle >= 25 && cycle < 35) return base; // PR segment
+      if (cycle >= 35 && cycle < 38) return base + 4; // Q wave
+      if (cycle >= 38 && cycle < 43) return base - 35; // R wave (sharp peak)
+      if (cycle >= 43 && cycle < 47) return base + 12; // S wave
+      if (cycle >= 47 && cycle < 58) return base; // ST segment
+      if (cycle >= 58 && cycle < 78) return base - Math.sin((cycle - 58) / 20 * Math.PI) * 9; // T wave
+      return base;
+    }
+
+    let ecgStep = 0;
+    function renderEcg() {
+      ecgCtx.fillStyle = 'rgba(3, 7, 18, 0.12)';
+      ecgCtx.fillRect(0, 0, ecgCanvas.width, ecgCanvas.height);
+
+      ecgCtx.strokeStyle = ecgPatternType === 'vf' ? '#f43f5e' : '#00f2fe';
+      ecgCtx.lineWidth = 2;
+      ecgCtx.lineJoin = 'round';
+      ecgCtx.beginPath();
+
+      const nextY = generateEcgY(ecgStep);
+      const prevX = (ecgX - ecgSpeed + ecgCanvas.width) % ecgCanvas.width;
+      const prevY = ecgPoints[prevX] || 45;
+
+      ecgCtx.moveTo(prevX, prevY);
+      ecgCtx.lineTo(ecgX, nextY);
+      ecgCtx.stroke();
+
+      ecgPoints[ecgX] = nextY;
+
+      // Pulse Sound on R peak
+      if (ecgPatternType !== 'vf' && (ecgStep % 100) === 40) {
+        playBeep(880, 0.05);
+      }
+
+      ecgX = (ecgX + ecgSpeed) % ecgCanvas.width;
+      ecgStep++;
+
+      // Leading scanner head bar
+      ecgCtx.fillStyle = 'rgba(0, 242, 254, 0.8)';
+      ecgCtx.fillRect(ecgX, 0, 3, ecgCanvas.height);
+
+      requestAnimationFrame(renderEcg);
+    }
+    requestAnimationFrame(renderEcg);
+
+    /* ========================================================
+       3. CLINICAL SCENARIOS DATA (КЛИНИЧЕСКИЕ КЕЙСЫ)
+    ======================================================== */
+    const clinicalCases = [
+      {
+        id: 1,
+        system: "Сердечно-сосудистая система",
+        title: "Фибрилляция желудочков: Внезапная остановка кровообращения",
+        description: "Пациент 52 лет внезапно потерял сознание прямо в приёмном отделении. Пульс на сонных артериях не определяется, дыхание агональное. На мониторе ЭКГ — хаотичные высокоамплитудные волны деполяризации без дифференцировки зубцов.",
+        symptoms: ["Потеря сознания", "Асистолия сонных артерий", "Хаотичный ритм ЭКГ"],
+        initialVitals: { hr: 0, bp: "0/0", spo2: 45, temp: 36.2, homeo: 15, pattern: "vf", statusText: "КРИТИЧЕСКИЙ (ФЖ)", statusColor: "var(--rose)" },
+        options: [
+          {
+            text: "Ввести внутривенно 40 мг Фуросемида и наблюдать",
+            correct: false,
+            feedbackTitle: "Ошибка! Недопустимое действие!",
+            feedbackText: "Фуросемид — петлевой диуретик, он бесполезен при фибрилляции желудочков и не восстанавливает ритм. Пациент погибнет от гипоксии мозга за 3 минуты."
+          },
+          {
+            text: "⚡ Немедленная дефибрилляция (ЭИТ 200 Дж) + Непрямой массаж сердца",
+            correct: true,
+            feedbackTitle: "Блестяще! Жизнь спасена!",
+            feedbackText: "Электрический разряд дефибриллятора одновременно деполяризует весь миокард, прерывая патологические круги re-entry, что позволяет синусовому узлу восстановить нормальный пейсмейкерный контроль."
+          },
+          {
+            text: "Дать под язык таблетку Нитроглицерина",
+            correct: false,
+            feedbackTitle: "Ошибка! Пациент без сознания!",
+            feedbackText: "Нитроглицерин противопоказан при остановке кровообращения и аспирации. Требуется немедленная электроимпульсная терапия!"
+          }
+        ]
+      },
+      {
+        id: 2,
+        system: "Дыхательная система",
+        title: "Астматический статус и дыхательный ацидоз",
+        description: "Девушка 22 лет доставлена с приступом удушья, экспираторной одышкой и свистящими хрипами, слышными на расстоянии. Разговор отдельными словами, участие вспомогательной мускулатуры шеи в акте дыхания.",
+        symptoms: ["SpO2 = 74%", "Экспираторное удушье", "Гиперкапния (pCO2 65 мм)"],
+        initialVitals: { hr: 135, bp: "145/95", spo2: 74, temp: 36.8, homeo: 40, pattern: "tachy", statusText: "ГИПОКСИЯ", statusColor: "var(--amber)" },
+        options: [
+          {
+            text: "Ингаляция селективного β₂-агониста (Сальбутамол через небулайзер) + O₂-терапия",
+            correct: true,
+            feedbackTitle: "Абсолютно верно! Бронхоспазм купирован!",
+            feedbackText: "Стимуляция β₂-адренорецепторов гладких мышц бронхов активирует аденилатциклазу и повышает цАМФ, вызывая мощную бронходилатацию и восстанавливая вентиляционно-перфузионный баланс."
+          },
+          {
+            text: "Ввести Пропранолол (неселективный β-блокатор) для снижения тахикардии",
+            correct: false,
+            feedbackTitle: "Фатальная ошибка!",
+            feedbackText: "Неселективные β-блокаторы блокируют β₂-рецепторы в бронхах и вызывают катастрофический тотальный спазм гладкой мускулатуры бронхиол!"
+          },
+          {
+            text: "Срочный плевральный дренаж по Бюлау",
+            correct: false,
+            feedbackTitle: "Неверно!",
+            feedbackText: "У пациентки нет признаков пневмоторакса или гидроторакса. Дренирование необоснованно и травматично."
+          }
+        ]
+      },
+      {
+        id: 3,
+        system: "Нервная система",
+        title: "Острейший ишемический инсульт: Окно тромболизиса",
+        description: "Мужчина 63 лет, 45 минут назад развилась слабость в правых конечностях, асимметрия лица (опущен правый угол рта) и моторная афазия. На КТ головного мозга исключено внутримозговое кровоизлияние.",
+        symptoms: ["Гемипарез справа", "Моторная афазия", "Тест FAST положительный"],
+        initialVitals: { hr: 88, bp: "175/105", spo2: 96, temp: 36.7, homeo: 50, pattern: "normal", statusText: "НЕЙРО-ИШЕМИЯ", statusColor: "var(--amber)" },
+        options: [
+          {
+            text: "Внутривенная системная тромболитическая терапия (РТПА / Альтеплаза)",
+            correct: true,
+            feedbackTitle: "Великолепно! Пенумбра спасена!",
+            feedbackText: "В пределах «терапевтического окна» (до 4.5 часов) рекомбинантный тканевой активатор плазминогена растворяет фибриновый тромб в окклюзированной мозговой артерии, восстанавливая перфузию нейронов."
+          },
+          {
+            text: "Ввести большую дозу Викасола (витамин К) для свёртывания",
+            correct: false,
+            feedbackTitle: "Грубая ошибка!",
+            feedbackText: "Коагулянты только усилят тромбообразование в церебральных сосудах и приведут к обширному необратимому некрозу ткани мозга."
+          },
+          {
+            text: "Приложить грелку к голове для расширения сосудов",
+            correct: false,
+            feedbackTitle: "Опасно и неэффективно!",
+            feedbackText: "Нагревание увеличивает метаболическую потребность ишемизированных нейронов в кислороде и усугубляет отек мозга."
+          }
+        ]
+      },
+      {
+        id: 4,
+        system: "Выделительная система",
+        title: "Острая гиперкалиемия и уремический кризис",
+        description: "Пациент с терминальной почечной недостаточностью пропустил два сеанса гемодиализа. На ЭКГ — высокие остроконечные зубцы Т, расширение комплекса QRS. Лабораторно: калий сыворотки крови 7.8 ммоль/л (норма 3.5-5.0). Угроза асистолии!",
+        symptoms: ["Калий 7.8 ммоль/л", "Остроконечные зубцы T", "Олигурия / Анурия"],
+        initialVitals: { hr: 50, bp: "160/100", spo2: 95, temp: 36.5, homeo: 35, pattern: "normal", statusText: "ГИПЕРКАЛИЕМИЯ", statusColor: "var(--rose)" },
+        options: [
+          {
+            text: "Кальция глюконат 10% в/в для стабилизации миокарда + Глюкозо-инсулиновая смесь + Срочный гемодиализ",
+            correct: true,
+            feedbackTitle: "Спасительное решение!",
+            feedbackText: "Ионы Ca²⁺ стабилизируют мембранный потенциал покоя кардиомиоцитов, снижая риск фибрилляции, а инсулин загоняет калий обратно внутрь клеток через Na⁺/K⁺-АТФазу."
+          },
+          {
+            text: "Ввести раствор Калия хлорида 4% внутривенно капельно",
+            correct: false,
+            feedbackTitle: "Смертельная ошибка!",
+            feedbackText: "Дополнительное введение калия при уровне 7.8 ммоль/л вызовет мгновенную остановку сердца в диастоле!"
+          },
+          {
+            text: "Назначить антибиотики широкого спектра",
+            correct: false,
+            feedbackTitle: "Не по адресу!",
+            feedbackText: "У пациента электролитная катастрофа, антибиотики не имеют отношения к патогенезу гиперкалиемии."
+          }
+        ]
+      },
+      {
+        id: 5,
+        system: "Эндокринная система",
+        title: "Тяжелая гипогликемическая кома",
+        description: "Молодой человек с сахарным диабетом 1 типа ввёл обычную дозу инсулина, но забыл поесть перед спортивной тренировкой. Обнаружен без сознания, профузный холодный пот, мышечные судороги. Глюкоза крови: 1.6 ммоль/л.",
+        symptoms: ["Гликемия 1.6 ммоль/л", "Судороги", "Профузный пот"],
+        initialVitals: { hr: 110, bp: "100/60", spo2: 97, temp: 35.8, homeo: 30, pattern: "normal", statusText: "ГИПОГЛИКЕМИЯ", statusColor: "var(--rose)" },
+        options: [
+          {
+            text: "Ввести внутривенно струйно 40% раствор глюкозы (40-60 мл) или Глюкагон п/к",
+            correct: true,
+            feedbackTitle: "Точно в цель! Пациент пришёл в сознание!",
+            feedbackText: "Головной мозг не имеет запасов гликогена и полностью зависит от глюкозы крови. Струйное введение гипертонической глюкозы спасает кору мозга от энергетического коллапса."
+          },
+          {
+            text: "Ввести 10 единиц инсулина короткого действия",
+            correct: false,
+            feedbackTitle: "Катастрофа!",
+            feedbackText: "Дополнительный инсулин снизит остатки глюкозы до нуля и приведет к необратимой гибели коры головного мозга."
+          },
+          {
+            text: "Попытаться напоить пациента горячим чаем с сахаром",
+            correct: false,
+            feedbackTitle: "Опасно! Риск асфиксии!",
+            feedbackText: "Пациенту без сознания категорически запрещено давать жидкость через рот из-за риска аспирации в дыхательные пути!"
+          }
+        ]
+      },
+      {
+        id: 6,
+        system: "Иммунная система",
+        title: "Анафилактический шок: Сосудистый коллапс",
+        description: "Через 5 минут после инъекции антибиотика у пациента развился генерализованный зуд, крапивница, отек лица и гортани, резкое падение артериального давления до 60/30 мм рт. ст., холодные конечности.",
+        symptoms: ["АД 60/30 мм рт.ст.", "Отёк гортани", "Дегрануляция тучных клеток"],
+        initialVitals: { hr: 140, bp: "60/30", spo2: 82, temp: 36.4, homeo: 25, pattern: "tachy", statusText: "АНАФИЛАКТИЧЕСКИЙ ШОК", statusColor: "var(--rose)" },
+        options: [
+          {
+            text: "Внутримышечно Адреналин (Эпинефрин) 0.5 мг в переднебоковую поверхность бедра + доступ к вене",
+            correct: true,
+            feedbackTitle: "Превосходно! Сосудистый тонус восстановлен!",
+            feedbackText: "Адреналин — препарат первого ряда: стимулирует α₁-адренорецепторы (сужение сосудов и подъем АД), β₁-рецепторы (усиление сердечного выброса) и β₂-рецепторы (расширение бронхов и подавление выброса гистамина)."
+          },
+          {
+            text: "Начать с таблетки Супрастина внутрь",
+            correct: false,
+            feedbackTitle: "Слишком медленно и неэффективно!",
+            feedbackText: "При сосудистом коллапсе пероральные антигистаминные препараты не всасываются и не спасают от гемодинамического шока. Нужен немедленный адреналин!"
+          },
+          {
+            text: "Ввести раствор Но-шпы (дротаверин)",
+            correct: false,
+            feedbackTitle: "Усугубит шок!",
+            feedbackText: "Дротаверин — миотропный спазмолитик, он вызовет еще большее расширение периферических сосудов и окончательно обрушит артериальное давление."
+          }
+        ]
+      }
+    ];
+
+    let currentCaseIndex = 0;
+
+    function loadCase(index) {
+      currentCaseIndex = index;
+      const c = clinicalCases[index];
+      
+      document.getElementById('caseSystemBadge').textContent = c.system;
+      document.getElementById('caseStepIndicator').textContent = `Клинический случай ${index + 1} из ${clinicalCases.length}`;
+      document.getElementById('caseTitle').textContent = c.title;
+      document.getElementById('caseDescription').textContent = c.description;
+
+      const sympBox = document.getElementById('caseSymptoms');
+      sympBox.innerHTML = c.symptoms.map(s => `<span class="symptom-chip">${s}</span>`).join('');
+
+      // Update Vitals Monitor
+      updateVitalsDisplay(c.initialVitals);
+      ecgPatternType = c.initialVitals.pattern;
+
+      // Populate Action Buttons
+      const actionsBox = document.getElementById('caseActionButtons');
+      actionsBox.innerHTML = '';
+      const letters = ['A', 'B', 'C', 'D'];
+
+      c.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.innerHTML = `
+          <div class="action-letter">${letters[idx]}</div>
+          <div class="action-content">
+            <h4>${opt.text}</h4>
+          </div>
+        `;
+        btn.onclick = () => selectCaseAction(opt, btn);
+        actionsBox.appendChild(btn);
+      });
+
+      // Hide feedback and next button
+      const fbBox = document.getElementById('caseFeedbackBox');
+      fbBox.className = 'action-feedback-box';
+      fbBox.style.display = 'none';
+      document.getElementById('nextCaseBtn').style.display = 'none';
+    }
+
+    function updateVitalsDisplay(v) {
+      document.getElementById('valHR').textContent = v.hr;
+      document.getElementById('valBP').textContent = v.bp;
+      document.getElementById('valSPO2').textContent = v.spo2;
+      document.getElementById('valTemp').textContent = v.temp;
+      document.getElementById('valHomeostasis').textContent = `${v.homeo}%`;
+      document.getElementById('meterFill').style.width = `${v.homeo}%`;
+
+      const statusEl = document.getElementById('monitorStatusText');
+      statusEl.textContent = v.statusText;
+      statusEl.style.color = v.statusColor;
+
+      const statLabel = document.getElementById('ecgStatLabel');
+      statLabel.textContent = `ЧСС: ${v.hr} BPM [${v.pattern.toUpperCase()}]`;
+
+      const hrCard = document.getElementById('cardHeartRate');
+      if (v.hr === 0 || v.hr > 130) hrCard.classList.add('alert');
+      else hrCard.classList.remove('alert');
+
+      const spo2Card = document.getElementById('cardSpo2');
+      if (v.spo2 < 90) spo2Card.classList.add('alert');
+      else spo2Card.classList.remove('alert');
+    }
+
+    function selectCaseAction(opt, btnElement) {
+      const allBtns = document.querySelectorAll('.action-btn');
+      allBtns.forEach(b => b.disabled = true);
+
+      const fbBox = document.getElementById('caseFeedbackBox');
+      const fbTitle = document.getElementById('feedbackTitle');
+      const fbExp = document.getElementById('feedbackExplanation');
+      const nextBtn = document.getElementById('nextCaseBtn');
+
+      if (opt.correct) {
+        fbBox.className = 'action-feedback-box success';
+        fbTitle.innerHTML = `✅ ${opt.feedbackTitle}`;
+        fbExp.textContent = opt.feedbackText;
+        playSuccessChime();
+
+        // Screen flash if defibrillator or shock
+        if (opt.text.includes('дефибрилляция') || opt.text.includes('⚡')) {
+          playDefibrillatorShock();
+          document.body.classList.add('screen-shock');
+          setTimeout(() => document.body.classList.remove('screen-shock'), 500);
+        }
+
+        // Vitals normalize
+        updateVitalsDisplay({
+          hr: 75,
+          bp: "120/80",
+          spo2: 99,
+          temp: 36.6,
+          homeo: 100,
+          pattern: "normal",
+          statusText: "СТАБИЛИЗИРОВАН",
+          statusColor: "var(--emerald)"
+        });
+        ecgPatternType = 'normal';
+
+        nextBtn.style.display = 'block';
+      } else {
+        fbBox.className = 'action-feedback-box error';
+        fbTitle.innerHTML = `⚠️ ${opt.feedbackTitle}`;
+        fbExp.textContent = opt.feedbackText;
+        playWrongBuzzer();
+
+        // Allow retry after 1.5s
+        setTimeout(() => {
+          allBtns.forEach(b => b.disabled = false);
+        }, 1200);
+      }
+      fbBox.style.display = 'block';
+    }
+
+    function nextCase() {
+      if (currentCaseIndex < clinicalCases.length - 1) {
+        loadCase(currentCaseIndex + 1);
+      } else {
+        alert("🎉 Поздравляем! Вы успешно спасли всех 6 пациентов в шоковой палате и восстановили жизненно важные функции организма!");
+        switchTab('arena');
+      }
+    }
+
+    /* ========================================================
+       4. ANATOMY EXPLORER DATA & LOGIC (АНАТОМИЧЕСКИЙ СКАНЕР)
+    ======================================================== */
+    const organsData = {
+      heart: {
+        name: "Сердце",
+        latin: "Cor / Cardia • Мышечный насос организма",
+        icon: "🫀",
+        weight: "250 - 350 г",
+        flow: "~250 мл/мин (5%)",
+        role: "Гемодинамика",
+        facts: [
+          "<strong>Неутомимый насос:</strong> За сутки человеческое сердце совершает около 100 000 ударов и перекачивает от 7 000 до 8 000 литров крови.",
+          "<strong>Автоматия миокарда:</strong> Сердце способно сокращаться вне тела благодаря собственным клеткам-пейсмейкерам в синусно-предсердном узле.",
+          "<strong>Энергетический баланс:</strong> Миокард потребляет до 70-80% кислорода из коронарного русла даже в состоянии покоя, питаясь преимущественно жирными кислотами."
+        ],
+        quiz: {
+          q: "Какой клапан разделяет левое предсердие и левый желудочек?",
+          options: ["Митральный (двустворчатый)", "Трёхстворчатый (трикуспидальный)", "Аортальный", "Лёгочный"],
+          correct: 0
+        }
+      },
+      brain: {
+        name: "Головной мозг",
+        latin: "Encephalon / Cerebrum • Высший командный центр",
+        icon: "🧠",
+        weight: "1300 - 1400 г",
+        flow: "~750 мл/мин (15%)",
+        role: "Нейрорегуляция",
+        facts: [
+          "<strong>Энергетический гигант:</strong> Занимая всего 2% от массы тела, мозг потребляет свыше 20% всего кислорода и 25% всей глюкозы крови.",
+          "<strong>Нейронная сеть:</strong> Содержит около 86 миллиардов нейронов, каждый из которых образует до 10 000 синаптических связей с другими клетками.",
+          "<strong>Гематоэнцефалический барьер (ГЭБ):</strong> Специализированный фильтр астроцитов и эндотелия, защищающий нейроны от токсинов и перепадов состава крови."
+        ],
+        quiz: {
+          q: "Какой отдел ствола мозга содержит жизненно важные центры дыхания и кровообращения?",
+          options: ["Продолговатый мозг", "Мозжечок", "Таламус", "Кора полушарий"],
+          correct: 0
+        }
+      },
+      lungs: {
+        name: "Лёгкие",
+        latin: "Pulmones • Внешнее дыхание и газообмен",
+        icon: "🫁",
+        weight: "1000 - 1200 г",
+        flow: "100% сердечного выброса",
+        role: "Газообмен O₂/CO₂",
+        facts: [
+          "<strong>Гигантская площадь:</strong> Около 300-500 миллионов альвеол суммарно создают площадь диффузии газов около 100-120 квадратных метров — размер теннисного корта!",
+          "<strong>Сурфактант:</strong> Тонкая фосфолипидная плёнка на стенках альвеол предотвращает их спадение при выдохе и снижает поверхностное натяжение.",
+          "<strong>Недыхательные функции:</strong> В лёгких происходит превращение ангиотензина I в ангиотензин II с помощью АПФ, а также фильтрация мелких микротромбов."
+        ],
+        quiz: {
+          q: "Какое вещество препятствует спадению (ателектазу) альвеол при выдохе?",
+          options: ["Сурфактант", "Фибриноген", "Гемоглобин", "Муцин"],
+          correct: 0
+        }
+      },
+      liver: {
+        name: "Печень",
+        latin: "Hepar • Главная биохимическая лаборатория",
+        icon: "🟤",
+        weight: "1400 - 1600 г",
+        flow: "~1500 мл/мин (25-30%)",
+        role: "Детоксикация и синтез",
+        facts: [
+          "<strong>Свыше 500 функций:</strong> Синтез альбуминов, белков свёртывания крови, депо гликогена, выработка жёлчи, метаболизм витаминов A, D, B12.",
+          "<strong>Феноменальная регенерация:</strong> Единственный орган человека, способный восстановить первоначальный размер даже при утрате до 70-75% своей массы.",
+          "<strong>Двойное кровоснабжение:</strong> 75% крови поступает по воротной вене от кишечника (с нутриентами), а 25% — по собственной печёночной артерии (с O₂)."
+        ],
+        quiz: {
+          q: "Какая вена собирает кровь от всех непарных органов брюшной полости и несёт её в печень?",
+          options: ["Воротная вена (v. portae)", "Нижняя полая вена", "Почечная вена", "Яремная вена"],
+          correct: 0
+        }
+      },
+      stomach: {
+        name: "Желудок",
+        latin: "Gaster / Ventriculus • Химическая мацерация пищи",
+        icon: "🥣",
+        weight: "150 - 200 г (пустой)",
+        flow: "~250 мл/мин",
+        role: "Расщепление белков",
+        facts: [
+          "<strong>Кислотный барьер:</strong> Желудочный сок содержит соляную кислоту (HCl), создающую pH около 1.5-2.0, способную растворять металлы и уничтожать патогены.",
+          "<strong>Фактор Кастла:</strong> Париетальные клетки желудка вырабатывают гликопротеин, необходимый для связывания и всасывания витамина B12 в подвздошной кишке.",
+          "<strong>Защитная слизь:</strong> Слой бикарбонатно-слизистого геля толщиной менее 1 мм предотвращает самопереваривание слизистой оболочки ферментом пепсином."
+        ],
+        quiz: {
+          q: "Какой фермент желудочного сока расщепляет белки в сильнокислой среде?",
+          options: ["Пепсин", "Амилаза", "Липаза", "Трипсин"],
+          correct: 0
+        }
+      },
+      kidneys: {
+        name: "Почки",
+        latin: "Renes / Nephros • Фильтрация и регуляция водно-солевого баланса",
+        icon: "🫘",
+        weight: "120 - 160 г (каждая)",
+        flow: "~1200 мл/мин (20-25%)",
+        role: "Гомеостаз электролитов",
+        facts: [
+          "<strong>180 литров в сутки:</strong> Именно столько первичной мочи образуется в почечных клубочках за 24 часа. Однако 99% реабсорбируется обратно, образуя лишь 1.5 л вторичной мочи.",
+          "<strong>Миллион нефронов:</strong> Каждая почка состоит примерно из 1 миллиона функциональных микрофильтров — нефронов.",
+          "<strong>Гормональная фабрика:</strong> Вырабатывают эритропоэтин (стимулирует образование эритроцитов), ренин (регулирует давление) и активируют витамин D3 в кальцитриол."
+        ],
+        quiz: {
+          q: "Какой гормон, стимулирующий кроветворение в красном костном мозге, синтезируется почками?",
+          options: ["Эритропоэтин", "Тироксин", "Инсулин", "Окситоцин"],
+          correct: 0
+        }
+      }
+    };
+
+    function selectOrgan(organKey) {
+      const data = organsData[organKey];
+      if (!data) return;
+
+      // Update Active hotspot
+      document.querySelectorAll('.organ-hotspot').forEach(el => el.classList.remove('active'));
+      const activeEl = document.getElementById(`hotspot-${organKey}`);
+      if (activeEl) activeEl.classList.add('active');
+
+      // Update Panel
+      document.getElementById('organIcon').textContent = data.icon;
+      document.getElementById('organName').textContent = data.name;
+      document.getElementById('organLatin').textContent = data.latin;
+      document.getElementById('organWeight').textContent = data.weight;
+      document.getElementById('organFlow').textContent = data.flow;
+      document.getElementById('organRole').textContent = data.role;
+
+      // Update Facts
+      const factsBox = document.getElementById('organFactsList');
+      factsBox.innerHTML = data.facts.map(f => `<div class="fact-item">${f}</div>`).join('');
+
+      // Update Micro Quiz
+      const q = data.quiz;
+      document.getElementById('microQuizQuestion').textContent = q.q;
+      const optsBox = document.getElementById('microQuizOptions');
+      optsBox.innerHTML = '';
+
+      q.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'micro-btn';
+        btn.textContent = optText;
+        btn.onclick = () => {
+          const allMicro = optsBox.querySelectorAll('.micro-btn');
+          allMicro.forEach(b => b.disabled = true);
+          if (idx === q.correct) {
+            btn.classList.add('correct');
+            playSuccessChime();
+          } else {
+            btn.classList.add('wrong');
+            allMicro[q.correct].classList.add('correct');
+            playWrongBuzzer();
+          }
+        };
+        optsBox.appendChild(btn);
+      });
+
+      playBeep(700, 0.05);
+    }
+
+    /* ========================================================
+       5. SPEED ARENA DATA & LOGIC (БЛИЦ-ТУРНИР)
+    ======================================================== */
+    const arenaQuestions = [
+      {
+        q: "Сколько костей насчитывает скелет взрослого человека в норме?",
+        options: ["206 костей", "150 костей", "320 костей", "184 кости"],
+        correct: 0
+      },
+      {
+        q: "Какая группа крови является универсальным донором по системе AB0 (по эритроцитам)?",
+        options: ["0 (I) Rh-отрицательная", "AB (IV) Rh-положительная", "A (II) Rh-положительная", "B (III) Rh-отрицательная"],
+        correct: 0
+      },
+      {
+        q: "Какой орган человека является самым крупным по массе и площади среди ВСЕХ органов?",
+        options: ["Кожа (~2 м² и до 4-5 кг)", "Печень", "Головной мозг", "Тонкий кишечник"],
+        correct: 0
+      },
+      {
+        q: "В каком органе взрослого человека происходит основной гемопоэз (образование эритроцитов)?",
+        options: ["Красный костный мозг", "Селезёнка", "Тимус (вилочковая железа)", "Лимфатические узлы"],
+        correct: 0
+      },
+      {
+        q: "Какая самая маленькая кость в теле человека?",
+        options: ["Стремечко в среднем ухе (~3 мм)", "Фаланга мизинца", "Носовая кость", "Надколенник"],
+        correct: 0
+      },
+      {
+        q: "Какой гормон эпифиза регулирует суточные циркадные ритмы сна и бодрствования?",
+        options: ["Мелатонин", "Кортизол", "Адреналин", "Паратгормон"],
+        correct: 0
+      },
+      {
+        q: "Какая нормальная pH артериальной крови здорового человека?",
+        options: ["7.35 – 7.45", "6.80 – 7.00", "7.80 – 8.00", "5.50 – 6.00"],
+        correct: 0
+      },
+      {
+        q: "Какая мышца является самой выносливой в теле человека?",
+        options: ["Миокард (сердечная мышца)", "Икроножная мышца", "Жевательная мышца", "Язык"],
+        correct: 0
+      },
+      {
+        q: "Что обеспечивает ток венозной крови в нижних конечностях вверх к сердцу против силы тяжести?",
+        options: ["Венозные клапаны и сокращение скелетных мышц", "Высокое артериальное давление", "Гравитация", "Только сокращения правого желудочка"],
+        correct: 0
+      },
+      {
+        q: "Сколько нефронов содержит каждая почка здорового человека?",
+        options: ["Около 1 миллиона", "Около 10 000", "Около 100 000", "Более 20 миллионов"],
+        correct: 0
+      },
+      {
+        q: "Какой отдел головного мозга отвечает за равновесие и точную координацию сложных движений?",
+        options: ["Мозжечок", "Гипоталамус", "Черная субстанция", "Лобная доля"],
+        correct: 0
+      },
+      {
+        q: "Какая среда преобладает в просвете двенадцатиперстной кишки?",
+        options: ["Слабощелочная (pH 7.5 - 8.5)", "Сильнокислая (pH 1.5)", "Нейтральная (pH 7.0)", "Бескислородная"],
+        correct: 0
+      }
+    ];
+
+    let arenaPlayer = { name: "Интерн", group: "107Б ҚРМУ" };
+    let arenaCurrentQ = 0;
+    let arenaScore = 0;
+    let arenaStreak = 0;
+    let arenaMaxStreak = 0;
+    let arenaCorrectCount = 0;
+    let arenaTimerInterval = null;
+    let arenaTimeLeft = 15;
+    let questionStartTime = 0;
+    let totalAnswerTime = 0;
+
+    function startArenaGame() {
+      const nameInp = document.getElementById('playerNameInput').value.trim();
+      const groupInp = document.getElementById('playerGroupInput').value.trim();
+
+      arenaPlayer.name = nameInp || "Интерн";
+      arenaPlayer.group = groupInp || "107Б ҚРМУ";
+
+      document.getElementById('arenaStartCard').style.display = 'none';
+      document.getElementById('arenaGameCard').style.display = 'flex';
+      document.getElementById('arenaResultsCard').style.display = 'none';
+
+      arenaCurrentQ = 0;
+      arenaScore = 0;
+      arenaStreak = 0;
+      arenaMaxStreak = 0;
+      arenaCorrectCount = 0;
+      totalAnswerTime = 0;
+
+      loadArenaQuestion();
+    }
+
+    function loadArenaQuestion() {
+      if (arenaCurrentQ >= arenaQuestions.length) {
+        finishArenaGame();
+        return;
+      }
+
+      const q = arenaQuestions[arenaCurrentQ];
+      document.getElementById('arenaQuestionText').textContent = q.q;
+      document.getElementById('arenaProgressText').textContent = `Вопрос ${arenaCurrentQ + 1} из ${arenaQuestions.length}`;
+      document.getElementById('arenaScore').textContent = arenaScore;
+      
+      const pct = (arenaCurrentQ / arenaQuestions.length) * 100;
+      document.getElementById('arenaProgressFill').style.width = `${pct}%`;
+
+      const streakBadge = document.getElementById('streakBadge');
+      streakBadge.textContent = `x${Math.min(4, 1 + Math.floor(arenaStreak / 2))}`;
+
+      // Populate options (shuffled display with correct index tracked)
+      const grid = document.getElementById('arenaOptionsGrid');
+      grid.innerHTML = '';
+
+      // Create shuffled indices
+      let indices = [0, 1, 2, 3];
+      indices.sort(() => Math.random() - 0.5);
+
+      indices.forEach(idx => {
+        const btn = document.createElement('button');
+        btn.className = 'arena-opt-btn';
+        btn.textContent = q.options[idx];
+        btn.onclick = () => selectArenaAnswer(idx === q.correct, btn);
+        grid.appendChild(btn);
+      });
+
+      // Start Countdown
+      arenaTimeLeft = 15;
+      questionStartTime = Date.now();
+      updateTimerUI();
+      clearInterval(arenaTimerInterval);
+      arenaTimerInterval = setInterval(() => {
+        arenaTimeLeft--;
+        updateTimerUI();
+        if (arenaTimeLeft <= 0) {
+          clearInterval(arenaTimerInterval);
+          selectArenaAnswer(false, null); // timeout
+        }
+      }, 1000);
+    }
+
+    function updateTimerUI() {
+      const timerEl = document.getElementById('arenaTimer');
+      const box = document.getElementById('timerBox');
+      timerEl.textContent = arenaTimeLeft;
+
+      if (arenaTimeLeft <= 4) {
+        box.classList.add('critical');
+        playBeep(950, 0.04);
+      } else {
+        box.classList.remove('critical');
+      }
+    }
+
+    function selectArenaAnswer(isCorrect, clickedBtn) {
+      clearInterval(arenaTimerInterval);
+      const timeSpent = Math.max(1, (Date.now() - questionStartTime) / 1000);
+      totalAnswerTime += timeSpent;
+
+      const allBtns = document.querySelectorAll('.arena-opt-btn');
+      allBtns.forEach(b => b.disabled = true);
+
+      const q = arenaQuestions[arenaCurrentQ];
+
+      if (isCorrect) {
+        if (clickedBtn) clickedBtn.classList.add('correct');
+        arenaStreak++;
+        if (arenaStreak > arenaMaxStreak) arenaMaxStreak = arenaStreak;
+        arenaCorrectCount++;
+
+        const multiplier = Math.min(4, 1 + Math.floor(arenaStreak / 2));
+        const timeBonus = Math.max(10, arenaTimeLeft * 15);
+        const points = (100 + timeBonus) * multiplier;
+        arenaScore += points;
+
+        playSuccessChime();
+      } else {
+        if (clickedBtn) clickedBtn.classList.add('wrong');
+        // highlight correct
+        allBtns.forEach(b => {
+          if (b.textContent === q.options[q.correct]) {
+            b.classList.add('correct');
+          }
+        });
+        arenaStreak = 0;
+        playWrongBuzzer();
+      }
+
+      document.getElementById('arenaScore').textContent = arenaScore;
+
+      setTimeout(() => {
+        arenaCurrentQ++;
+        loadArenaQuestion();
+      }, 1200);
+    }
+
+    function finishArenaGame() {
+      clearInterval(arenaTimerInterval);
+      document.getElementById('arenaGameCard').style.display = 'none';
+      document.getElementById('arenaResultsCard').style.display = 'flex';
+
+      const accuracy = Math.round((arenaCorrectCount / arenaQuestions.length) * 100);
+      const avgTime = (totalAnswerTime / arenaQuestions.length).toFixed(1);
+
+      document.getElementById('resScore').textContent = `${arenaScore} БАЛЛОВ`;
+      document.getElementById('resAccuracy').textContent = `${accuracy}%`;
+      document.getElementById('resAvgTime').textContent = `${avgTime} сек`;
+      document.getElementById('resMaxStreak').textContent = `${arenaMaxStreak}x`;
+
+      let rank = "Студент-Интерн";
+      let badge = "🌱";
+      if (arenaScore >= 3500) { rank = "Академик Физиологии РК"; badge = "👑"; }
+      else if (arenaScore >= 2500) { rank = "Главный Реаниматолог"; badge = "🏆"; }
+      else if (arenaScore >= 1800) { rank = "Врач Высшей Категории"; badge = "🥇"; }
+      else if (arenaScore >= 1000) { rank = "Ординатор Кафедры"; badge = "🥈"; }
+
+      document.getElementById('resRank').textContent = `Звание: ${rank}`;
+      document.getElementById('resBadge').textContent = badge;
+
+      // Save to Leaderboard
+      saveScore(arenaPlayer.name, arenaPlayer.group, arenaScore, rank);
+
+      // Render Diploma Canvas
+      renderCertificate(arenaPlayer.name, arenaPlayer.group, arenaScore, rank, accuracy);
+    }
+
+    function restartArena() {
+      document.getElementById('arenaResultsCard').style.display = 'none';
+      document.getElementById('arenaStartCard').style.display = 'flex';
+    }
+
+    /* ========================================================
+       6. CERTIFICATE CANVAS GENERATOR (ГЕНЕРАТОР ДИПЛОМА)
+    ======================================================== */
+    function renderCertificate(name, group, score, rank, accuracy) {
+      const c = document.getElementById('certificateCanvas');
+      const ctx = c.getContext('2d');
+
+      // Gradient Background
+      const bgGrad = ctx.createLinearGradient(0, 0, c.width, c.height);
+      bgGrad.addColorStop(0, '#0a1128');
+      bgGrad.addColorStop(0.5, '#050c1e');
+      bgGrad.addColorStop(1, '#020617');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, c.width, c.height);
+
+      // Gold Double Border
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(20, 20, c.width - 40, c.height - 40);
+
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, c.width - 60, c.height - 60);
+
+      // Header
+      ctx.fillStyle = '#00f2fe';
+      ctx.font = 'bold 22px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ҚАЗАҚСТАН-РЕСЕЙ МЕДИЦИНАЛЫҚ УНИВЕРСИТЕТІ (ҚРМУ)', c.width / 2, 75);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '15px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('КАФЕДРА НОРМАЛЬНОЙ ФИЗИОЛОГИИ И МЕДИЦИНСКОЙ БИОЛОГИИ', c.width / 2, 102);
+
+      // Certificate Title
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 42px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('СЕРТИФИКАТ ВРАЧА-ИССЛЕДОВАТЕЛЯ', c.width / 2, 160);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '16px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Настоящий сертификат подтверждает, что студент', c.width / 2, 195);
+
+      // Student Name
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = '800 36px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(name.toUpperCase(), c.width / 2, 245);
+
+      ctx.fillStyle = '#00f2fe';
+      ctx.font = '600 20px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(`Группа: ${group}`, c.width / 2, 280);
+
+      // Results Text
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = '18px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(`Успешно завершил интерактивный модуль «Организм Человека: Гомеостаз»`, c.width / 2, 330);
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = '700 24px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText(`Присвоено звание: ${rank}`, c.width / 2, 370);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '17px "JetBrains Mono", monospace';
+      ctx.fillText(`Результат: ${score} баллов • Точность: ${accuracy}%`, c.width / 2, 405);
+
+      // Footer & Official Stamp
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('ru-RU');
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Дата выдачи: ${dateStr}`, 60, 485);
+      ctx.fillText(`ID протокола: KRMU-BIO-${Math.floor(100000 + Math.random() * 900000)}`, 60, 505);
+
+      // Simulated Stamp
+      ctx.save();
+      ctx.translate(c.width - 150, 470);
+      ctx.rotate(-0.15);
+      ctx.strokeStyle = 'rgba(0, 242, 254, 0.7)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 42, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(0, 242, 254, 0.7)';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ҚРМУ 2026', 0, -6);
+      ctx.fillText('ПРОВЕРЕНО', 0, 10);
+      ctx.restore();
+    }
+
+    function downloadCertificate() {
+      const c = document.getElementById('certificateCanvas');
+      const a = document.createElement('a');
+      a.download = `Сертификат_${arenaPlayer.name}_ҚРМУ.png`;
+      a.href = c.toDataURL('image/png');
+      a.click();
+    }
+
+    function shareResults() {
+      const text = `🫀 Я набрал ${arenaScore} баллов в интерактивной игре «Организм Человека: Гомеостаз» (ҚРМУ)! Попробуй побить мой рекорд: https://anispace123.github.io/russiantestgame/`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          alert("📋 Ссылка и ваш рекорд скопированы! Отправьте в группу WhatsApp / Telegram.");
+        });
+      } else {
+        alert(text);
+      }
+    }
+
+    /* ========================================================
+       7. LEADERBOARD STORAGE (РЕЙТИНГ)
+    ======================================================== */
+    function getLeaderboard() {
+      try {
+        const data = localStorage.getItem('krmu_bio_leaderboard');
+        return data ? JSON.parse(data) : [
+          { name: "Накипов Әділжан", group: "107Б", score: 4250, rank: "Академик Физиологии РК" },
+          { name: "Аханай Ернұр", group: "107Б", score: 3820, rank: "Главный Реаниматолог" },
+          { name: "Серік Мерей", group: "107Б", score: 3640, rank: "Врач Высшей Категории" },
+          { name: "Алихан С.", group: "107Б", score: 2950, rank: "Ординатор Кафедры" }
+        ];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveScore(name, group, score, rank) {
+      let list = getLeaderboard();
+      list.push({ name, group, score, rank });
+      list.sort((a, b) => b.score - a.score);
+      list = list.slice(0, 15);
+      try {
+        localStorage.setItem('krmu_bio_leaderboard', JSON.stringify(list));
+      } catch (e) {}
+      renderLeaderboard();
+    }
+
+    function renderLeaderboard() {
+      const list = getLeaderboard();
+      const container = document.getElementById('leaderboardList');
+      container.innerHTML = '';
+
+      list.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = `leader-row ${idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : ''}`;
+        row.innerHTML = `
+          <div class="leader-left">
+            <div class="rank-num">${idx + 1}</div>
+            <div>
+              <div class="leader-name">${item.name}</div>
+              <div class="leader-group">${item.group} • ${item.rank}</div>
+            </div>
+          </div>
+          <div class="leader-score">${item.score} <span style="font-size:0.75rem; color:var(--text-muted);">pts</span></div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function clearLeaderboard() {
+      if (confirm("Очистить таблицу лидеров?")) {
+        localStorage.removeItem('krmu_bio_leaderboard');
+        renderLeaderboard();
+      }
+    }
+
+    /* ========================================================
+       8. TAB NAVIGATION & MODALS
+    ======================================================== */
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+
+      const activeBtn = document.getElementById(`tab-${tabId}`);
+      const activeView = document.getElementById(`view-${tabId}`);
+
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeView) activeView.classList.add('active');
+
+      if (tabId === 'leaderboard') renderLeaderboard();
+      playBeep(650, 0.05);
+    }
+
+    function openQrModal() {
+      document.getElementById('qrModal').classList.add('active');
+      playBeep(800, 0.06);
+    }
+
+    function closeQrModal(e) {
+      document.getElementById('qrModal').classList.remove('active');
+    }
+
+    function copyQrLink() {
+      const url = document.getElementById('qrUrlText').textContent.trim();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => {
+          alert("✅ Ссылка скопирована: " + url);
+        });
+      }
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      loadCase(0);
+      selectOrgan('heart');
+      renderLeaderboard();
+    });
+  </script>
+</body>
+</html>
