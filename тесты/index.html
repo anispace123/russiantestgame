@@ -1256,6 +1256,415 @@
     }
 
     /* ========================================================
+       MODE 0: HOME / TITLE PAGE (ТИТУЛЬНАЯ СТРАНИЦА И ЦЕЛЬ)
+    ======================================================== */
+    .home-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .home-hero-card {
+      padding: 40px 32px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(0, 242, 254, 0.25);
+      background: radial-gradient(circle at 80% 20%, rgba(0, 242, 254, 0.08) 0%, rgba(15, 23, 42, 0.8) 70%);
+      box-shadow: 0 15px 40px -10px rgba(0, 242, 254, 0.15);
+    }
+
+    .hero-university-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .uni-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .dept-badge {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .home-title {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    .home-title span.grad {
+      background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #a855f7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .home-subtitle {
+      font-size: 1.12rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 820px;
+      margin-bottom: 26px;
+    }
+
+    .home-authors-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .author-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+
+    .author-chip strong {
+      color: #fff;
+    }
+
+    .author-chip span {
+      color: var(--text-sub);
+      font-size: 0.78rem;
+    }
+
+    .home-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .btn-hero-primary {
+      background: linear-gradient(135deg, #00f2fe, #3b82f6);
+      color: #04101e;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 14px 28px;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 25px var(--cyan-glow);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 40px var(--cyan-glow);
+    }
+
+    .btn-hero-outline {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 14px 22px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-hero-outline:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    /* Goals Section */
+    .goals-section-card {
+      padding: 32px;
+    }
+
+    .section-headline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .section-icon-pill {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(0, 242, 254, 0.15);
+      border: 1px solid rgba(0, 242, 254, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .section-headline h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .goals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .goal-box {
+      background: rgba(3, 7, 18, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .goal-box:hover {
+      border-color: rgba(0, 242, 254, 0.35);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.1);
+    }
+
+    .goal-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--cyan);
+      background: rgba(0, 242, 254, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .goal-box h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .goal-box p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Modules Overview (Ознакомление) */
+    .modules-section-card {
+      padding: 32px;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 880px) {
+      .modules-grid {
+        grid-template-columns: 1fr;
+      }
+      .home-title {
+        font-size: 2rem;
+      }
+    }
+
+    .module-card {
+      background: rgba(3, 7, 18, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card:hover {
+      border-color: var(--cyan);
+      transform: translateY(-4px);
+      box-shadow: 0 15px 35px -10px rgba(0, 242, 254, 0.2);
+    }
+
+    .module-icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      margin-bottom: 4px;
+    }
+
+    .mod-reanim .module-icon-wrap {
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    .mod-anatomy .module-icon-wrap {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+    }
+
+    .mod-arena .module-icon-wrap {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .module-card h4 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .module-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      flex-grow: 1;
+    }
+
+    .module-features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 12px 0;
+      font-size: 0.82rem;
+      color: #cbd5e1;
+    }
+
+    .module-features-list li {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .module-features-list li::before {
+      content: "•";
+      color: var(--cyan);
+      font-weight: bold;
+    }
+
+    .btn-launch-mod {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-launch-mod:hover {
+      background: var(--cyan);
+      color: #04101e;
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan-glow);
+    }
+
+    /* Live QR Onboarding Banner */
+    .home-qr-banner {
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(6, 78, 119, 0.3));
+      border: 1px solid var(--border-glow);
+    }
+
+    .qr-banner-text {
+      max-width: 580px;
+    }
+
+    .qr-banner-text h4 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .qr-banner-text p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .qr-mini-card {
+      background: #fff;
+      padding: 8px;
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(0, 242, 254, 0.3);
+      transition: var(--transition);
+    }
+
+    .qr-mini-card:hover {
+      transform: scale(1.05);
+    }
+
+    .qr-mini-card img {
+      width: 100px;
+      height: 100px;
+      display: block;
+    }
+
+    .qr-mini-caption {
+      color: #04101e;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ========================================================
        QR CODE MODAL
     ======================================================== */
     .modal-backdrop {
@@ -1358,7 +1767,7 @@
   <!-- Header -->
   <header>
     <div class="header-container">
-      <div class="logo-badge" onclick="switchTab('reanim')">
+      <div class="logo-badge" onclick="switchTab('home')">
         <div class="logo-icon">🫀</div>
         <div class="logo-text">
           <h1>ГОМЕОСТАЗ</h1>
@@ -1386,7 +1795,11 @@
 
   <!-- Navigation Tabs -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" id="tab-reanim" onclick="switchTab('reanim')">
+    <button class="tab-btn active" id="tab-home" onclick="switchTab('home')">
+      <span>🏛️</span>
+      <span>Титульный лист & Цель</span>
+    </button>
+    <button class="tab-btn" id="tab-reanim" onclick="switchTab('reanim')">
       <span>🩺</span>
       <span>Реанимация Пациента</span>
     </button>
@@ -1408,9 +1821,189 @@
   <main>
 
     <!-- ========================================================
+         VIEW 0: TITLE PAGE, GAME GOAL & ONBOARDING (ТИТУЛЬНЫЙ ЛИСТ)
+    ======================================================== -->
+    <section class="view-section active" id="view-home">
+      <div class="home-container">
+        
+        <!-- Hero Title Card -->
+        <div class="glass-panel home-hero-card">
+          <div class="hero-university-bar">
+            <div class="uni-badge">
+              <span>🏛️</span>
+              <span>Қазақстан-Ресей Медициналық Университеті (ҚРМУ)</span>
+            </div>
+            <div class="dept-badge">
+              Кафедра нормальной физиологии и биологии • 107Б тобы
+            </div>
+          </div>
+
+          <h2 class="home-title">
+            <span class="grad">ГОМЕОСТАЗ:</span> Битва за Жизнь
+          </h2>
+
+          <p class="home-subtitle">
+            Интерактивный мультимедийный тренажер и клинический образовательный квест, посвященный физиологии и фундаментальным системам жизнеобеспечения организма человека.
+          </p>
+
+          <div class="home-authors-strip">
+            <div class="author-chip">
+              <span>Автор / Разработчик:</span>
+              <strong>Накипов Әділжан</strong>
+            </div>
+            <div class="author-chip">
+              <span>Спикер:</span>
+              <strong>Аханай Ернұр</strong>
+            </div>
+            <div class="author-chip">
+              <span>Спикер:</span>
+              <strong>Серік Мерей</strong>
+            </div>
+            <div class="author-chip">
+              <span>Курс / Группа:</span>
+              <strong>1-курс, 107Б тобы</strong>
+            </div>
+          </div>
+
+          <div class="home-cta-row">
+            <button class="btn-hero-primary" onclick="switchTab('reanim')">
+              <span>Начать игру: В реанимацию 🩺</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+            <button class="btn-hero-outline" onclick="switchTab('anatomy')">
+              <span>🔬 Анатомический сканер</span>
+            </button>
+            <button class="btn-hero-outline" onclick="switchTab('arena')">
+              <span>⚡ Блиц-Батл всей группой</span>
+            </button>
+            <button class="btn-hero-outline" onclick="openQrModal()">
+              <span>📲 QR код для смартфонов</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live QR Onboarding Banner -->
+        <div class="glass-panel home-qr-banner">
+          <div class="qr-banner-text">
+            <h4>📲 Интерактив для всей группы в аудитории</h4>
+            <p>
+              Каждый студент может прямо сейчас навести камеру смартфона на QR-код и запустить игру у себя. Ваши ответы в Блиц-турнире моментально отправляются в общую облачную базу данных рейтинга группы!
+            </p>
+          </div>
+          <div class="qr-mini-card" onclick="openQrModal()" title="Нажмите, чтобы открыть QR-код на весь экран">
+            <img src="qr_code.png" alt="QR Код игры">
+            <span class="qr-mini-caption">Сканировать QR</span>
+          </div>
+        </div>
+
+        <!-- Goals & Objectives (Цель игры) -->
+        <div class="glass-panel goals-section-card">
+          <div class="section-headline">
+            <div class="section-icon-pill">🎯</div>
+            <div>
+              <h3>Цель и задачи образовательного симулятора</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Чему учит и какие практические навыки формирует игра</p>
+            </div>
+          </div>
+
+          <div class="goals-grid">
+            <div class="goal-box">
+              <span class="goal-num">ЦЕЛЬ #01</span>
+              <h4>Понимание Гомеостаза</h4>
+              <p>Освоение фундаментального принципа Клода Бернара и Уолтера Кеннона: динамическое постоянство внутренней среды организма (pH крови, температура, осмолярность, газы крови) как базовое условие выживания.</p>
+            </div>
+
+            <div class="goal-box">
+              <span class="goal-num">ЦЕЛЬ #02</span>
+              <h4>Клиническое мышление врача</h4>
+              <p>Обучение мгновенному анализу монитора витальных функций (ЭКГ-ритм, сатурация SpO₂, артериальное давление) и принятию неотложных патогенетических решений при шоке, остановке сердца и коме.</p>
+            </div>
+
+            <div class="goal-box">
+              <span class="goal-num">ЦЕЛЬ #03</span>
+              <h4>Анатомо-физиологическая интеграция</h4>
+              <p>Наглядное изучение взаимосвязи структуры и функции ключевых систем (Сердце, Мозг, Легкие, Печень, Желудок, Почки), их органного кровотока и функциональных резервов.</p>
+            </div>
+
+            <div class="goal-box">
+              <span class="goal-num">ЦЕЛЬ #04</span>
+              <h4>Групповой соревновательный дух</h4>
+              <p>Синхронизация в реальном времени через облачную базу данных: студенты группы 107Б соревнуются в скорости и точности, получая именные электронные дипломы ҚРМУ.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Onboarding & Game Rules (Ознакомление с модулями) -->
+        <div class="glass-panel modules-section-card">
+          <div class="section-headline">
+            <div class="section-icon-pill">📖</div>
+            <div>
+              <h3>Ознакомление: Структура и 3 игровых модуля</h3>
+              <p style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Выберите интересующий раздел или проходите симулятор последовательно</p>
+            </div>
+          </div>
+
+          <div class="modules-grid">
+            <!-- Mod 1 -->
+            <div class="module-card mod-reanim">
+              <div>
+                <div class="module-icon-wrap">🩺</div>
+                <h4>Модуль 1: Клиническая Реанимация</h4>
+                <p>Вы — дежурный реаниматолог в палате интенсивной терапии. Пациенты поступают в критическом состоянии. Задача — спасти жизнь, применив правильный протокол.</p>
+                <ul class="module-features-list">
+                  <li>Живой Canvas-монитор ЭКГ и пульсоксиметрии</li>
+                  <li>Разряд дефибриллятора (ЭИТ 200 Дж) при фибрилляции</li>
+                  <li>6 острых сценариев: инфаркт, астма, инсульт, анафилаксия</li>
+                </ul>
+              </div>
+              <button class="btn-launch-mod" onclick="switchTab('reanim')">
+                Перейти в Реанимацию ➔
+              </button>
+            </div>
+
+            <!-- Mod 2 -->
+            <div class="module-card mod-anatomy">
+              <div>
+                <div class="module-icon-wrap">🔬</div>
+                <h4>Модуль 2: Анатомический Сканер</h4>
+                <p>Интерактивная био-лаборатория с анатомическим силуэтом человека. Исследуйте ключевые органы, открывайте скрытые физиологические факты и проходите экспресс-тесты.</p>
+                <ul class="module-features-list">
+                  <li>6 интерактивных зон органов с подсветкой</li>
+                  <li>Масса, минутный объем кровотока и функциональная роль</li>
+                  <li>Мгновенный мини-тест по каждому органу</li>
+                </ul>
+              </div>
+              <button class="btn-launch-mod" onclick="switchTab('anatomy')">
+                Открыть Сканер Органов ➔
+              </button>
+            </div>
+
+            <!-- Mod 3 -->
+            <div class="module-card mod-arena">
+              <div>
+                <div class="module-icon-wrap">⚡</div>
+                <h4>Модуль 3: Блиц-Батл «Гомеостаз»</h4>
+                <p>Скоростной турнир для студентов группы. Ответьте на 12 вопросов за 15 секунд на каждый, наберите максимум баллов и займите 1-е место в группе!</p>
+                <ul class="module-features-list">
+                  <li>Счетчик комбо-очков (x1, x2, x3, x4)</li>
+                  <li>Генерация официального Сертификата Врача (PNG)</li>
+                  <li>Синхронизация с общей облачной базой лидеров</li>
+                </ul>
+              </div>
+              <button class="btn-launch-mod" onclick="switchTab('arena')">
+                Запустить Блиц-Батл ➔
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================
          VIEW 1: CLINICAL RESUSCITATION (РЕАНИМАЦИЯ)
     ======================================================== -->
-    <section class="view-section active" id="view-reanim">
+    <section class="view-section" id="view-reanim">
       <div class="reanim-grid">
         
         <!-- Left: Patient Vitals Monitor -->
